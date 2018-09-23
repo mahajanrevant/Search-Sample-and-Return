@@ -14,9 +14,9 @@ A mask is created to take this into account
 
 #### Threshold 
 The navigable terrain, obstacles, rocks are identified using simple rgb threshold interpreted as `[red, blue, green]`
-All pixels below `[160, 160, 160]` classify under navigable terrain - `color_thresh(img, rgb_thresh=(160, 160, 160))`
-All pixels above `[160, 160, 160]` classify under obstacles - `obstacle_thresh(img, rgb_thresh=(160, 160, 160))`
-All pixels below `[160, 160, 160]` classify under rocks - `rock_thresh(img, rock_thresh=(130, 180, 100,170,0,30))`
+* All pixels below `[160, 160, 160]` classify under navigable terrain - `color_thresh(img, rgb_thresh=(160, 160, 160))`
+* All pixels above `[160, 160, 160]` classify under obstacles - `obstacle_thresh(img, rgb_thresh=(160, 160, 160))`
+* All pixels below `[160, 160, 160]` classify under rocks - `rock_thresh(img, rock_thresh=(130, 180, 100,170,0,30))`
 
 #### World Coordinates 
 The above processes give results in terms of rover centric coordinates. These coodrinates are then converted into world-centric coordinates. The mean of all the navigable terrain is taken and is represented by the line. The angle of this line with respect to the x-axis is the navigation angles. 
