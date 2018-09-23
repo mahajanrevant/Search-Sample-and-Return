@@ -21,12 +21,15 @@ The navigable terrain, obstacles, rocks are identified using simple rgb threshol
 * All pixels below `[160, 160, 160]` classify under rocks - `rock_thresh(img, rock_thresh=(130, 180, 100,170,0,30))`
 
 ![Obstacle](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Obstacle.PNG)
+
 __Obstacle__
 
 ![Path](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Path.PNG)
+
 __Navigable Terrain__
 
 ![Rock](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Rock.PNG)
+
 __Rock__
 
 #### World Coordinates 
