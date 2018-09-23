@@ -35,7 +35,7 @@ __Rock__
 #### World Coordinates 
 The above processes give results in terms of rover centric coordinates. These coodrinates are then converted into world-centric coordinates. The mean of all the navigable terrain is taken and is represented by the line. The angle of this line with respect to the x-axis is the navigation angles. 
 
-![Coordinate_Transform]https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Coordinate_Transform.PNG)
+![Coordinate_Transform](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Coordinate_Transform.PNG)
 
 ### Mapping 
 * Red Channel - Obstacles
