@@ -1,52 +1,122 @@
-[//]: # (Image References)
-[image_0]: ./misc/rover_image.jpg
-[![Udacity - Robotics NanoDegree Program](https://s3-us-west-1.amazonaws.com/udacity-robotics/Extra+Images/RoboND_flag.png)](https://www.udacity.com/robotics)
-# Search and Sample Return Project
+# Project: Search and Sample Return
+---
+
+![gif](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/ezgif.com-gif-maker.gif)
 
 
-![alt text][image_0]
+## Introduction 
+The aim of the project was to map an unknown environment of a rover using camera mounted on it. The goal was to map 40% of the environment with 60% minimum fidelity, and locate minimum one rock
 
-This project is modeled after the [NASA sample return challenge](https://www.nasa.gov/directorates/spacetech/centennial_challenges/sample_return_robot/index.html) and it will give you first hand experience with the three essential elements of robotics, which are perception, decision making and actuation.  You will carry out this project in a simulator environment built with the Unity game engine.  
+## Notebook Analysis
+### Image Processing
 
-## The Simulator
-The first step is to download the simulator build that's appropriate for your operating system.  Here are the links for [Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip), [Mac](	https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip), or [Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip).  
+#### Perspective Transform
+The rover camera faces forward. Perspective transform is used to convert this to a top view. 
+Also as the field of vision does not cover the area behind the camera, it cannot be assumed obstacles.
+A mask is created to take this into account
 
-You can test out the simulator by opening it up and choosing "Training Mode".  Use the mouse or keyboard to navigate around the environment and see how it looks.
+![Perspective_Transform](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Perspective_Transform.PNG)
 
-## Dependencies
-You'll need Python 3 and Jupyter Notebooks installed to do this project.  The best way to get setup with these if you are not already is to use Anaconda following along with the [RoboND-Python-Starterkit](https://github.com/ryan-keenan/RoboND-Python-Starterkit).
+#### Threshold 
+The navigable terrain, obstacles, rocks are identified using simple rgb threshold interpreted as `[red, blue, green]`
+* All pixels below `[160, 160, 160]` classify under navigable terrain - `color_thresh(img, rgb_thresh=(160, 160, 160))`
+* All pixels above `[160, 160, 160]` classify under obstacles - `obstacle_thresh(img, rgb_thresh=(160, 160, 160))`
+* All pixels below `[160, 160, 160]` classify under rocks - `rock_thresh(img, rock_thresh=(130, 180, 100,170,0,30))`
 
+![Obstacle](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Obstacle.PNG)
 
-Here is a great link for learning more about [Anaconda and Jupyter Notebooks](https://classroom.udacity.com/courses/ud1111)
+__Obstacle__
 
-## Recording Data
-I've saved some test data for you in the folder called `test_dataset`.  In that folder you'll find a csv file with the output data for steering, throttle position etc. and the pathnames to the images recorded in each run.  I've also saved a few images in the folder called `calibration_images` to do some of the initial calibration steps with.  
+![Path](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Path.PNG)
 
-The first step of this project is to record data on your own.  To do this, you should first create a new folder to store the image data in.  Then launch the simulator and choose "Training Mode" then hit "r".  Navigate to the directory you want to store data in, select it, and then drive around collecting data.  Hit "r" again to stop data collection.
+__Navigable Terrain__
 
-## Data Analysis
-Included in the IPython notebook called `Rover_Project_Test_Notebook.ipynb` are the functions from the lesson for performing the various steps of this project.  The notebook should function as is without need for modification at this point.  To see what's in the notebook and execute the code there, start the jupyter notebook server at the command line like this:
+![Rock](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Rock.PNG)
 
-```sh
-jupyter notebook
+__Rock__
+
+#### World Coordinates 
+The above processes give results in terms of rover centric coordinates. These coodrinates are then converted into world-centric coordinates. The mean of all the navigable terrain is taken and is represented by the line. The angle of this line with respect to the x-axis is the navigation angles. 
+
+![Coordinate_Transform](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Coordinate_Transform.PNG)
+
+### Mapping 
+* Red Channel - Obstacles
+* Blue Channel - Navigable Terrain 
+* All Channel - Rocks
+
 ```
+    data.worldmap[y_world, x_world,2] = 255
+    data.worldmap[obsy_world, obsx_world,0] = 255
+```
+To sort out the conflict between navigable terrain and obstacle, a trivial methodolgy is used,
+Every pixel having a navigable terrain cannot be in the obstacle channel
 
-This command will bring up a browser window in the current directory where you can navigate to wherever `Rover_Project_Test_Notebook.ipynb` is and select it.  Run the cells in the notebook from top to bottom to see the various data analysis steps.  
+```
+    nav_pix = data.worldmap[:,:,2] > 0
+    data.worldmap[nav_pix , 0] = 0
+```
+Rocks are mapped as below
 
-The last two cells in the notebook are for running the analysis on a folder of test images to create a map of the simulator environment and write the output to a video.  These cells should run as-is and save a video called `test_mapping.mp4` to the `output` folder.  This should give you an idea of how to go about modifying the `process_image()` function to perform mapping on your data.  
+```
+    if rock_threshed.any():
+        rockxpix,rockypix = rover_coords(threshed)
+        rock_x_world, rock_y_world =  pix_to_world(rockxpix, rockypix, xpos, ypos, yaw, world_size, scale)
+        data.worldmap[rock_y_world, rock_x_world,:] = 255
+```
+## Autonomous Navigation and Mapping 
 
-## Navigating Autonomously
-The file called `drive_rover.py` is what you will use to navigate the environment in autonomous mode.  This script calls functions from within `perception.py` and `decision.py`.  The functions defined in the IPython notebook are all included in`perception.py` and it's your job to fill in the function called `perception_step()` with the appropriate processing steps and update the rover map. `decision.py` includes another function called `decision_step()`, which includes an example of a conditional statement you could use to navigate autonomously.  Here you should implement other conditionals to make driving decisions based on the rover's state and the results of the `perception_step()` analysis.
+### Perception
+This is handled by the perception_step() method in perception.py. This method is similar to what is performed in notebook analysis.
 
-`drive_rover.py` should work as is if you have all the required Python packages installed. Call it at the command line like this:
+Perspective transform is performed on the camera image. Thresholding is done and everything is converteed into the world coordinates.
+Instead of updating each channel with 255, a small value is added over time.
 
-```sh
-python drive_rover.py
-```  
+```
+    Rover.worldmap[obsy_world, obsx_world, 0] += 1 # Obstacle map
+    Rover.worldmap[y_world, x_world, 2] += 5 # Navigable Terrain
+```
+Based on the navigable terrain, naigation angles were updates. This is an essential part as the rover will not move without there being valid values of navigable terrrain.
 
-Then launch the simulator and choose "Autonomous Mode".  The rover should drive itself now!  It doesn't drive that well yet, but it's your job to make it better!  
+Also, rocks are updated in the yellow channel.
+```
+        Rover.vision_image[:,:,1] = rock_threshed * 255
+```
+All the necessary changes are made in the rover object before returning it.
 
-**Note: running the simulator with different choices of resolution and graphics quality may produce different results!  Make a note of your simulator settings in your writeup when you submit the project.**
+### Autonomous Mapping
+The decision step of the Rover is handled in the decision_step() method in decision.py.This contains the code to drive rover based on inferences made by the perception_step() method in perception.py
 
-### Project Walkthrough
-If you're struggling to get started on this project, or just want some help getting your code up to the minimum standards for a passing submission, we've recorded a walkthrough of the basic implementation for you but **spoiler alert: this [Project Walkthrough Video](https://www.youtube.com/watch?v=oJA6QHDPdQw) contains a basic solution to the project!**.
+`if Rover.nav_angles is not None: `
+
+The rover does not move if there is no navigation angles updated in the Rover object.
+
+Case 1: Forward and enough navigable terrain
+
+* If robot is moving forward and is __not__ at max velocity, accelerate.
+* If robot is moving forward and is at max velocity, cruize.
+
+Case 2: Forward and not enough navigable terrain
+
+* Go to stop mode
+
+Case 3: Stop mode
+
+* If not stopped, keep braking.
+* If stopped, turn to find navigable terrain.
+* If found nagiable terrain, go to forward state.
+
+## Result 
+
+![end](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/End.jpg)
+
+
+
+## Improvements 
+* Only change Rover object values from perecpet when the robot is stable (Roll is close to zero)
+* Rover gets stuck sometimes.Add code to avoid that.
+* Add functionality to pick up rocks.
+* Map the world with close boundaries.
+* Make the rover clever to map efficiently.
+
+
