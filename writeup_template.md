@@ -22,9 +22,9 @@ The navigable terrain, obstacles, rocks are identified using simple rgb threshol
 The above processes give results in terms of rover centric coordinates. These coodrinates are then converted into world-centric coordinates. The mean of all the navigable terrain is taken and is represented by the line. The angle of this line with respect to the x-axis is the navigation angles. 
 
 ### Mapping 
-Red Channel - Obstacles
-Blue Channel - Navigable Terrain 
-ALl Channel - Rocks
+* Red Channel - Obstacles
+* Blue Channel - Navigable Terrain 
+* All Channel - Rocks
 
 ```
     data.worldmap[y_world, x_world,2] = 255
@@ -45,3 +45,24 @@ Rocks are mapped as below
         rock_x_world, rock_y_world =  pix_to_world(rockxpix, rockypix, xpos, ypos, yaw, world_size, scale)
         data.worldmap[rock_y_world, rock_x_world,:] = 255
 ```
+## Autonomous Navigation and Mapping 
+
+### Perception
+This is handled by the perception_step method in perception.py. This method is similar to what is performed in notebook analysis.
+
+Perspective transform is performed on the camera image. Thresholding is done and everything is converteed into the world coordinates.
+Instead of updating each channel with 255, a small value is added over time.
+
+```
+    Rover.worldmap[obsy_world, obsx_world, 0] += 1 # Obstacle map
+    Rover.worldmap[y_world, x_world, 2] += 5 # Navigable Terrain
+```
+Based on the navigable terrain, naigation angles were updates. This is an essential part as the rover will not move without there being valid values of navigable terrrain.
+
+Also, rocks are updated in the yellow channel.
+```
+        Rover.vision_image[:,:,1] = rock_threshed * 255
+```
+All the necessary changes are made in the rover object before returning it.
+
+### Autonomous Mapping
