@@ -87,6 +87,11 @@ Case 3: Stop mode
 * If stopped, turn to find navigable terrain.
 * If found nagiable terrain, go to forward state.
 
-
+## Improvements 
+* Only change Rover object values from perecpet when the robot is stable (Roll is close to zero)
+* Rover gets stuck sometimes.Add code to avoid that.
+* Add functionality to pick up rocks.
+* Map the world with close boundaries.
+* Make the rover clever to map efficiently.
 
 
