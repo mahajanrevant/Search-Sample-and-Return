@@ -12,14 +12,27 @@ The rover camera faces forward. Perspective transform is used to convert this to
 Also as the field of vision does not cover the area behind the camera, it cannot be assumed obstacles.
 A mask is created to take this into account
 
+![Perspective_Transform](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Perspective_Transform.PNG)
+
 #### Threshold 
 The navigable terrain, obstacles, rocks are identified using simple rgb threshold interpreted as `[red, blue, green]`
 * All pixels below `[160, 160, 160]` classify under navigable terrain - `color_thresh(img, rgb_thresh=(160, 160, 160))`
 * All pixels above `[160, 160, 160]` classify under obstacles - `obstacle_thresh(img, rgb_thresh=(160, 160, 160))`
 * All pixels below `[160, 160, 160]` classify under rocks - `rock_thresh(img, rock_thresh=(130, 180, 100,170,0,30))`
 
+![Obstacle](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Obstacle.PNG)
+__Obstacle__
+
+![Path](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Path.PNG)
+__Navigable Terrain__
+
+![Rock](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Rock.PNG)
+__Rock__
+
 #### World Coordinates 
 The above processes give results in terms of rover centric coordinates. These coodrinates are then converted into world-centric coordinates. The mean of all the navigable terrain is taken and is represented by the line. The angle of this line with respect to the x-axis is the navigation angles. 
+
+![Coordinate_Transform]https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/Coordinate_Transform.PNG)
 
 ### Mapping 
 * Red Channel - Obstacles
