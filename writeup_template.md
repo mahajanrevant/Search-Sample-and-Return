@@ -1,6 +1,9 @@
 # Project: Search and Sample Return
 ---
 
+![gif](https://github.com/mahajanrevant/Search-Sample-and-Return/blob/master/Pictures/ezgif.com-gif-maker.gif)
+
+
 ## Introduction 
 The aim of the project was to map an unknown environment of a rover using camera mounted on it. The goal was to map 40% of the environment with 60% minimum fidelity, and locate minimum one rock
 
