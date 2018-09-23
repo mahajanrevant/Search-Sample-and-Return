@@ -48,7 +48,7 @@ Rocks are mapped as below
 ## Autonomous Navigation and Mapping 
 
 ### Perception
-This is handled by the perception_step method in perception.py. This method is similar to what is performed in notebook analysis.
+This is handled by the perception_step() method in perception.py. This method is similar to what is performed in notebook analysis.
 
 Perspective transform is performed on the camera image. Thresholding is done and everything is converteed into the world coordinates.
 Instead of updating each channel with 255, a small value is added over time.
@@ -66,3 +66,27 @@ Also, rocks are updated in the yellow channel.
 All the necessary changes are made in the rover object before returning it.
 
 ### Autonomous Mapping
+The decision step of the Rover is handled in the decision_step() method in decision.py.This contains the code to drive rover based on inferences made by the perception_step() method in perception.py
+
+`if Rover.nav_angles is not None: `
+
+The rover does not move if there is no navigation angles updated in the Rover object.
+
+Case 1: Forward and enough navigable terrain
+
+* If robot is moving forward and is __not__ at max velocity, accelerate.
+* If robot is moving forward and is at max velocity, cruize.
+
+Case 2: Forward and not enough navigable terrain
+
+* Go to stop mode
+
+Case 3: Stop mode
+
+* If not stopped, keep braking.
+* If stopped, turn to find navigable terrain.
+* If found nagiable terrain, go to forward state.
+
+
+
+
